@@ -1,9 +1,9 @@
-/// usr/bin/env jbang "$0" "$@" ; exit $?
-// JAVA 17+
+///usr/bin/env jbang "$0" "$@" ; exit $?
+//JAVA 17+
 
-// DEPS info.picocli:picocli:4.6.3
-// DEPS com.github.spullara.mustache.java:compiler:0.9.10
-// DEPS org.springframework.boot:spring-boot-configuration-processor:2.7.12
+//DEPS info.picocli:picocli:4.6.3
+//DEPS com.github.spullara.mustache.java:compiler:0.9.10
+//DEPS org.springframework.boot:spring-boot-configuration-processor:2.7.12
 
 import com.github.mustachejava.DefaultMustacheFactory;
 import com.github.mustachejava.Mustache;
