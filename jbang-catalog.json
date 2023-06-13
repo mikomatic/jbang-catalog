@@ -4,6 +4,10 @@
     "hello": {
       "script-ref": "hello.java",
       "description": "Script that prints hello world"
+    },
+    "springPropertyDocumenter": {
+      "script-ref": "springPropertyDocumenter.java",
+      "description": "Document spring boot properties based on property metadata"
     }
   }
 }
