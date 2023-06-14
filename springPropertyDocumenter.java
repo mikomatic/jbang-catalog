@@ -16,15 +16,22 @@ import picocli.CommandLine;
 import picocli.CommandLine.Command;
 
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.stream.Stream;
 
+import static java.util.Optional.ofNullable;
 import static java.util.stream.Collectors.groupingBy;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.mapping;
@@ -75,6 +82,11 @@ class springPropertyDocumenter implements Callable<Integer> {
           "Folder(s) containing spring boot configuration metadata files (defaults to current folder)",
       defaultValue = "./")
   private Path[] metadataLocationFolders;
+
+  @CommandLine.Option(
+      names = {"--template", "-t"},
+      description = "an optional mustache template")
+  private Path templateFile;
 
   @CommandLine.Option(
       names = {"--output", "-o"},
@@ -142,7 +154,7 @@ class springPropertyDocumenter implements Callable<Integer> {
                     mapping(this::toPrintableItemMetadata, toList())));
 
     MustacheFactory mf = new DefaultMustacheFactory();
-    Mustache mustache = mf.compile(new StringReader(DEFAULT_MD_TEMPLATE), "template");
+    Mustache mustache = compileTemplate(mf);
 
     try (StringWriter stringWriter = new StringWriter()) {
       System.out.println("Generating documentation file : %s ...".formatted(output));
@@ -157,13 +169,27 @@ class springPropertyDocumenter implements Callable<Integer> {
     return 0;
   }
 
+  private Mustache compileTemplate(MustacheFactory mf) {
+    if (templateFile == null) {
+      System.out.println("using default template ...");
+      return mf.compile(new StringReader(DEFAULT_MD_TEMPLATE), "template");
+    } else {
+      System.out.println("using provided template %s...".formatted(templateFile));
+      try {
+        return mf.compile(new FileReader(templateFile.toFile()), "template");
+      } catch (FileNotFoundException e) {
+        throw new RuntimeException("provided template file was not found", e);
+      }
+    }
+  }
+
   private PrintableItemMetadata toPrintableItemMetadata(ItemMetadata itemMetadata) {
     Object defaultValueAsObject = itemMetadata.getDefaultValue();
     String defaultValue;
     if (defaultValueAsObject instanceof Object[] collection) {
       defaultValue = Arrays.stream(collection).map(String::valueOf).collect(joining(",", "", ""));
     } else {
-      defaultValue = Optional.ofNullable(defaultValueAsObject).orElse("").toString();
+      defaultValue = ofNullable(defaultValueAsObject).orElse("").toString();
     }
     return new PrintableItemMetadata(
         itemMetadata.getName(),
@@ -180,6 +206,10 @@ class springPropertyDocumenter implements Callable<Integer> {
     }
   }
 
+  /**
+   * a printable configuration metadata item for easier integration with mustache template.
+   * Equivalent to {@link ItemMetadata}
+   */
   record PrintableItemMetadata(
       String name, String description, String defaultValue, ItemDeprecation deprecation) {}
 }
