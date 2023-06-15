@@ -7,7 +7,16 @@ Catalog of jbang scripts
 A simple script to export your `META-INF/spring-configuration-metadata.json` files into a more
 human-readable format.
 
-```bash
+### Pre-requisites
+
+- Spring Boot's [typesafe configuration properties](https://docs.spring.io/spring-boot/docs/current/reference/html/features.html#features.external-config.typesafe-configuration-properties) should be enabled, with some javadocs.
+- Spring Boot's [`spring-boot-configuration-processor`](https://docs.spring.io/spring-boot/docs/current/reference/html/configuration-metadata.html#appendix.configuration-metadata.annotation-processor) should be enabled. 
+- Compile your project using `maven` or `gradle`
+
+### Usage
+
+```bash cd intro
+# cd into your project root and compile sources with `maven` ou `gradle`
 jbang springPropertyDocumenter@mikomatic -o generated-docs.md
 ```
 
